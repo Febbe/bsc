@@ -1,0 +1,3 @@
+#pragma once
+
+constexpr char const* version_name = "@PROJECT_VERSION@";

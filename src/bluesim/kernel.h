@@ -2,6 +2,11 @@
 #define __KERNEL_H__
 
 #include <deque>
+#include <mutex>
+#include <vector>
+#include <map>
+#include <set>
+#include <list>
 
 #include "bluesim_kernel_api.h"
 #include "bs_model.h"
@@ -16,7 +21,7 @@
 
 /* state */
 
-typedef enum { VCD_OFF, VCD_HEADER, VCD_ENABLED, VCD_DISABLED } tVCDStatus;
+enum tVCDStatus{VCD_OFF, VCD_HEADER, VCD_ENABLED, VCD_DISABLED};
 
 // Represents a change of a value
 class Change
@@ -35,7 +40,7 @@ public:
     : num(n), bits(v.size()), isX(false), wide(v)
   {}
 public:
-  tUInt32 num;   // VCD ID number
+  tUInt32 num;        // VCD ID number
   unsigned int bits;  // bit width
   bool isX;           // is an X value
   tUInt64 narrow;     // narrow data
@@ -133,8 +138,8 @@ struct tSimState {
   volatile bool sim_shutting_down;
   tSemaphore* start_semaphore; /* used to trigger simulation start */
   tSemaphore* stop_semaphore;  /* used to indicate simulation stop */
-  pthread_mutex_t sim_mutex;   /* used to protect sim_running, etc. */
-  pthread_t sim_thread_id;
+  std::mutex  sim_mutex;       /* used to protect sim_running, etc. */
+  std::thread sim_thread_id;
 
   // flag to record when executing a combinational logic schedule
   bool in_combo_schedule;

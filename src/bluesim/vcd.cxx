@@ -9,8 +9,8 @@
 #include "bs_target.h"
 
 // VCD generator version
-static const unsigned int major_rev = 2;
-static const unsigned int minor_rev = 1;
+static constexpr unsigned int major_rev = 2;
+static constexpr unsigned int minor_rev = 1;
 
 /* VCD change buffer mechanism
  *
@@ -235,7 +235,7 @@ bool vcd_check_file_size(tSimStateHdl simHdl)
   tVCDState* s = &(simHdl->vcd);
   if ((s->vcd_file != NULL) && (s->vcd_filesize_limit != 0llu))
   {
-    unsigned long long sz = (unsigned long long) ftello(s->vcd_file);
+    unsigned long long sz = (unsigned long long) std::ftell(s->vcd_file);
     if (sz > s->vcd_filesize_limit)
     {
       vcd_write_comment(simHdl, "VCD file size limit exceeded\n");

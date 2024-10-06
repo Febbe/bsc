@@ -4,8 +4,7 @@
 #include <cstdarg>
 #include <cstdlib>
 #include <cstdio>
-#include <errno.h>
-#include <unistd.h>
+#include <semaphore>
 
 #include "portability.h"
 
@@ -100,7 +99,7 @@ void release_semaphore(tSemaphore* semaphore)
   sem_close(semaphore);
 }
 
-#else /* USE_NAMED_SEMAPHORES */
+#elif !defined (_WIN32) /* USE_NAMED_SEMAPHORES */
 
 /*
  * Implementation using unnamed semaphores.
@@ -134,8 +133,26 @@ void release_semaphore(tSemaphore* semaphore)
   free(semaphore);
 }
 
-#endif /* USE_NAMED_SEMAPHORES */
+#else /* USE_NAMED_SEMAPHORES */
 
+struct tSemaphore{
+  tSemaphore() : semaphore(0) {}
+  std::binary_semaphore semaphore;
+};
+
+tSemaphore* create_semaphore()
+{
+  return new tSemaphore();
+}
+
+void release_semaphore(tSemaphore* semaphore)
+{
+  delete semaphore;
+}
+
+#endif 
+
+#if !defined (_WIN32)
 /*
  * Common implementation for both named and unnamed semaphores.
  */
@@ -160,3 +177,24 @@ void wait_on_semaphore(tSemaphore* semaphore)
   while ((sem_wait(semaphore) != 0) && (errno == EINTR)) {};
 }
 
+#else /* _WIN32 */
+
+void post_semaphore(tSemaphore* semaphore)
+{
+  if (semaphore == NULL) return;
+  semaphore->semaphore.release();
+}
+
+void trywait_on_semaphore(tSemaphore* semaphore)
+{
+  if (semaphore == NULL) return;
+  while (!semaphore->semaphore.try_acquire()) {};
+}
+
+void wait_on_semaphore(tSemaphore* semaphore)
+{
+  if (semaphore == NULL) return;
+  semaphore->semaphore.acquire();
+}
+
+#endif /* _WIN32 */

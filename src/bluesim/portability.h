@@ -5,10 +5,12 @@
  * which enhance code portability.
  */
 
-#include <cstdio>
 #include <sys/types.h>
 #include <limits.h>
+
+#ifndef _WIN32
 #include <semaphore.h>
+#endif
 
 /* The defines for limits of long long values change across versions */
 #ifndef LLONG_MAX
@@ -40,7 +42,12 @@ unsigned long long powll(unsigned int base, unsigned int exp);
 #define USE_NAMED_SEMAPHORES 0
 #endif
 
+#ifndef _WIN32
 typedef sem_t tSemaphore;
+#else
+struct tSemaphore;
+#endif
+
 
 tSemaphore* create_semaphore();
 void post_semaphore(tSemaphore* semaphore);

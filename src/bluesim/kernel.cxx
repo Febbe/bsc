@@ -1,18 +1,17 @@
-#include <list>
-#include <algorithm>
-#include <cstring>
-#include <cstdio>
-
-#include <pthread.h>
-#include <signal.h>
-
-#include "mem_alloc.h"
 #include "kernel.h"
-#include "bs_module.h"
-#include "plusargs.h"
-#include "version.h"
-#include "portability.h"
 
+#include "bs_module.h"
+#include "mem_alloc.h"
+#include "plusargs.h"
+#include "portability.h"
+#include "version.h"
+
+#include <algorithm>
+#include <csignal>
+#include <cstdio>
+#include <cstring>
+#include <list>
+#include <thread>
 
 /* forward declarations of some static helper functions */
 static void setup_state_dump_events(tSimStateHdl simHdl, bool initial);
@@ -21,16 +20,21 @@ static void setup_clock_edges(tSimStateHdl simHdl, tClock clk);
 
 /* mutex operations */
 
-static void lock_sim_state(tSimStateHdl simHdl)
-{
-  if (pthread_mutex_lock(&(simHdl->sim_mutex)) != 0)
+static void lock_sim_state(tSimStateHdl simHdl) {
+  try {
+    simHdl->sim_mutex.lock();
+  } catch (...) {
     perror("lock_sim_state()");
+  }
 }
 
 static void unlock_sim_state(tSimStateHdl simHdl)
 {
-  if (pthread_mutex_unlock(&(simHdl->sim_mutex)) != 0)
+  try {
+    simHdl->sim_mutex.unlock();
+  } catch (...) {
     perror("unlock_sim_state()");
+  }
 }
 
 /* Stop the simulation thread until told to restart */
@@ -106,14 +110,17 @@ static void remove_abort_watcher(tSimStateHdl simHdl)
  * operations.  It communicates with the rest of the API through
  * semaphore operations in pause_sim, bk_advance and wait_for_sim_stop.
  */
-static void* sim_thread(void* ptr)
+static void sim_thread(void* ptr)
 {
   tSimState* simHdl = (tSimState*)ptr;
 
   if ((simHdl == NULL) || (simHdl->queue == NULL))
-    return NULL;
+    return;
 
   /* install signal handlers to shut down simulation */
+  #if defined(_WIN32)
+    std::signal(SIGINT, abort_handler);
+  #else
   struct sigaction sa;
   sa.sa_flags = 0;
   sa.sa_handler = abort_handler;
@@ -122,7 +129,7 @@ static void* sim_thread(void* ptr)
   sigaction(SIGINT, &sa, NULL);
   /* SIGPIPE (usually stdout piped to a program that exits, eg /usr/bin/head) */
   sigaction(SIGPIPE, &sa, NULL);
-
+  #endif
   /* add this sim to the signal watch list */
   add_abort_watcher(simHdl);
 
@@ -142,8 +149,6 @@ static void* sim_thread(void* ptr)
 
   /* remove this sim from the signal watch list */
   remove_abort_watcher(simHdl);
-
-  pthread_exit(NULL);
 }
 
 /*
@@ -715,7 +720,6 @@ tSimStateHdl bk_init(tModel model, tBool master)
   /* setup simulation thread infrastructure */
   simHdl->force_halt = false;
   simHdl->sim_shutting_down = false;
-  pthread_mutex_init(&(simHdl->sim_mutex), NULL);
   simHdl->start_semaphore = create_semaphore();
   simHdl->stop_semaphore = create_semaphore();
   if (simHdl->start_semaphore == NULL || simHdl->stop_semaphore == NULL)
@@ -727,7 +731,7 @@ tSimStateHdl bk_init(tModel model, tBool master)
 
   /* start the simulation thread and wait for it to block in pause_sim */
   simHdl->sim_running = true;
-  pthread_create(&(simHdl->sim_thread_id), NULL, sim_thread, (void*)simHdl);
+  simHdl->sim_thread_id = std::thread(sim_thread, simHdl);
   wait_for_sim_stop(simHdl);
 
   return simHdl;
@@ -745,7 +749,7 @@ void bk_shutdown(tSimStateHdl simHdl)
   simHdl->sim_shutting_down = true;
   unlock_sim_state(simHdl);
   post_semaphore(simHdl->start_semaphore);
-  pthread_join(simHdl->sim_thread_id, NULL);
+  simHdl->sim_thread_id.join();
   simHdl->sim_running = false;
 
   /* clean up semaphores and mutexes */
@@ -753,7 +757,6 @@ void bk_shutdown(tSimStateHdl simHdl)
   simHdl->start_semaphore = NULL;
   release_semaphore(simHdl->stop_semaphore);
   simHdl->stop_semaphore = NULL;
-  pthread_mutex_destroy(&(simHdl->sim_mutex));
 
   simHdl->model->destroy_model();
   shutdown_mem_allocator();

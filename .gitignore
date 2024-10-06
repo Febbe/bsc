@@ -13,3 +13,8 @@ build
 
 .vagrant/
 vagrant-out/
+
+# clangd cache
+.cache
+# IDE settings
+.vscode

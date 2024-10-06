@@ -1,13 +1,15 @@
-#include <cstring>
-
 #include "bs_target.h"
+
+#include <cstring>
+#include <cstdio>
+
 
 // FileTarget implementation simply forwards output to a file
 
 FileTarget::FileTarget(FILE* file_ptr)
   : out(file_ptr)
 {
-  setlinebuf(file_ptr);
+  setvbuf(file_ptr, NULL, _IOLBF, 0);
 }
 
 FileTarget::~FileTarget()
