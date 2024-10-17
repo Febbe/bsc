@@ -949,12 +949,12 @@ genIfcField trec ifcIdIn prefixes (FInf fieldIdQ argtypes rettype _) =
 -- create a RDY field, if requested
 mkReadyField :: IfcTRec -> [IfcPragma] -> Id -> Id -> Id -> [CField]
 mkReadyField trec ifcprags rootIfcId fieldId pathFieldId = if makingReady then [cfield] else []
-    where  pps = rec_pprops trec
-           readyId = mkRdyId pathFieldId -- why mkRdyId only to compare it later?
-           makingReady = not ((isAlwaysRdy pps readyId) || (isAlwaysReadyIfc ifcprags) )
-           --
-           renamed = mkRdyId pathFieldId
-           cfield = CField { cf_name = renamed,
+    where pps = rec_pprops trec;
+          readyId = mkRdyId pathFieldId; -- why mkRdyId only to compare it later?
+          makingReady = not ((isAlwaysRdy pps readyId) || (isAlwaysReadyIfc ifcprags) )
+          --
+          renamed = mkRdyId pathFieldId
+          cfield = CField { cf_name = renamed,
                              cf_pragmas = Nothing,
                              cf_type = (CQType [] (TAp tBit (cTNum 1 (getPosition fieldId)))),
                              cf_orig_type = Nothing,
@@ -2011,14 +2011,14 @@ binId ifcp i = (mkIdPre (concatFString (ifcp_pathIdString ifcp)) (unQualId i))
 -- Generate a new set of prefixes since the field Id is an interface and we have to traverse down it.
 extendPrefixes :: IfcPrefixes -> [IfcPragma] -> CType -> Id -> GWMonad IfcPrefixes
 -- XXX idEmpty is a horrible way to know we're not terminating on an interface..
-extendPrefixes ifcp _ _ fid | fid == idEmpty = return ifcp
+extendPrefixes ifcp _ _ fid | fid == idEmpty = return ifcp;
 extendPrefixes ifcp iprags ifct fid =
-    do  localiprags <- getInterfacePrags (getResultIdFromType ifct)
+    do  localiprags <- getInterfacePrags (getResultIdFromType ifct);
         return IfcPrefixes {
                             ifcp_pathIdString = newPP,
                             ifcp_renamePrefixes = renames',
                             ifcp_pragmas = aear ++ localiprags
-                           }
+                           };
     where pathPrefix = ifcp_pathIdString ifcp
           renames = ifcp_renamePrefixes ifcp
           -- the new prefix is the just the path extended with the current path.

@@ -339,46 +339,43 @@ dumpOneConflicts :: S.Set (AId, AId) -> S.Set (AId, AId) -> S.Set (AId, AId) ->
                     AId -> [AId] -> [(AId,RuleConflictType)]
 dumpOneConflicts _ _ _ mid [] = []
 dumpOneConflicts setCF setSB setSBR mid others = dumpConflicts mid others
-    where  dumpConflicts :: AId -> [AId] -> [(AId,RuleConflictType)]
-           dumpConflicts mid []          = []
-           dumpConflicts mid (mid':rest) =
+    where dumpConflicts :: AId -> [AId] -> [(AId,RuleConflictType)]
+          dumpConflicts mid []          = []
+          dumpConflicts mid (mid':rest) =
                case ((mid, mid') `S.member` setCF,
                      (mid', mid) `S.member` setCF,
                      (mid, mid') `S.member` setSB,
                      (mid', mid) `S.member` setSB,
                      (mid, mid') `S.member` setSBR,
                      (mid', mid) `S.member` setSBR
-                    ) of
-                 (True,_,_,_,_,_) ->
-                     ((mid',ConflictFree)  : (dumpConflicts mid rest))
-                 (_,True,_,_,_,_) ->
-                     ((mid',ConflictFree)  : (dumpConflicts mid rest))
-                 (False,False,True,False,False,False) ->
-                     ((mid', SCBefore)     : (dumpConflicts mid rest))
-                 (False,False,False,True,False,False) ->
-                     ((mid', SCAfter)      : (dumpConflicts mid rest))
-                 (False,False,True,True,False,False) ->
-                     (if (mid == mid') then
-                          (mid', SCBefore) -- method SC with itself
-                      else
-                          (mid', Complete)) -- alternate way of representing complete conflict
-                     : (dumpConflicts mid rest)
-                 (False,False,False,False,True,False) ->
-                     ((mid', SCBeforeR)      : (dumpConflicts mid rest))
-                 (False,False,False,False,False,True) ->
-                     ((mid', SCAfterR)      : (dumpConflicts mid rest))
-                 (False,False,False,False,True,True) ->
-                     (if (mid == mid') then
-                          (mid', SCBeforeR) -- method SC with itself
-                      else
-                          (mid', Complete)) -- alternate way of representing complete conflict
-                     : (dumpConflicts mid rest)
-                 (False,False,False,False,False,False) ->
-                     ((mid', Complete)     : (dumpConflicts mid rest))
-                 x@(a,b,c,d,e,f)  ->  internalError ("Unknown conflict type: " ++ ppReadable x
-                                       ++ " " ++ (ppReadable mid) ++
-                                       " " ++ (ppReadable mid') ++ "\n" ++
-                                       "Sched sets: " ++ (ppReadable (setCF, setSB, setSBR)))
+                    )
+               of
+                   (True,_,_,_,_,_) -> ((mid',ConflictFree) : (dumpConflicts mid rest))
+                   (_,True,_,_,_,_) -> ((mid',ConflictFree) : (dumpConflicts mid rest))
+                   (False,False,True,False,False,False) -> ((mid', SCBefore) : (dumpConflicts mid rest))
+                   (False,False,False,True,False,False) -> ((mid', SCAfter) : (dumpConflicts mid rest))
+                   (False,False,True,True,False,False) ->
+                       (if (mid == mid') then
+                            (mid', SCBefore) -- method SC with itself
+                        else
+                            (mid', Complete)) -- alternate way of representing complete conflict
+                       : (dumpConflicts mid rest)
+                   (False,False,False,False,True,False) ->
+                       ((mid', SCBeforeR) : (dumpConflicts mid rest))
+                   (False,False,False,False,False,True) ->
+                       ((mid', SCAfterR) : (dumpConflicts mid rest))
+                   (False,False,False,False,True,True) ->
+                       (if (mid == mid') then
+                            (mid', SCBeforeR) -- method SC with itself
+                        else
+                            (mid', Complete)) -- alternate way of representing complete conflict
+                       : (dumpConflicts mid rest)
+                   (False,False,False,False,False,False) ->
+                       ((mid', Complete)     : (dumpConflicts mid rest))
+                   x@(a,b,c,d,e,f)  ->  internalError ("Unknown conflict type: " ++ ppReadable x
+                                         ++ " " ++ (ppReadable mid) ++
+                                         " " ++ (ppReadable mid') ++ "\n" ++
+                                         "Sched sets: " ++ (ppReadable (setCF, setSB, setSBR)))
 
 
 removeADefMethodPredsByRuleId :: [Id] -> [ADef] -> [ADef]

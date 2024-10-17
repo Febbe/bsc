@@ -1184,7 +1184,7 @@ methodClockName i t ws = do
                            when (not (isJust mId)) $ internalError ("IExpand.methodClockName non-boundaryClock" ++ ppReadable c)
                            return mId
     case candidateClocks of
-      []  -> do deferErrors [(getPosition i, EMethodNoBoundaryClock (pfpString i))]
+      []  -> do deferErrors [(getPosition i, EMethodNoBoundaryClock (pfpString i))];
                 return Nothing -- pretend it is noClock because we'll die anyway
       -- only one clock in the domain, so no choice
       [c] -> returnClock c
@@ -1203,15 +1203,16 @@ methodResetName i ws = do
     []  -> return Nothing
     [r] -> if r `elem` boundaryResets then
                boundaryResetToName r
-            else do eWarning (pos, WMethodNoBoundaryReset (pfpString i))
-                    return Nothing
+            else do eWarning (pos, WMethodNoBoundaryReset (pfpString i));
+                    return Nothing;
     _   -> case (listToMaybe (methodResets `intersect` boundaryResets)) of
-             Nothing -> do eWarning (pos, WMethodNoBoundaryReset (pfpString i))
-                           return Nothing
-             Just r  -> do res <- boundaryResetToName r
-                           eWarning (pos, WMethodMultipleBoundaryReset
-                                            (pfpString i) (fmap pfpString res))
-                           return res
+             Nothing -> do eWarning (pos, WMethodNoBoundaryReset (pfpString i));
+                           return Nothing;
+             Just r  -> do {
+                          res <- boundaryResetToName r;
+                          eWarning (pos, WMethodMultipleBoundaryReset (pfpString i) (fmap pfpString res));
+                          return res;
+                        }
 
 -----------------------------------------------------------------------------
 
@@ -1774,9 +1775,9 @@ newState b ui t tss vi ns es = do
                                                (getIdString rst_id)
                                                modName instName
                                                rst_pairs)]
-                 in  do ess <- mapM deriveOneGroup gs
-                        let es = concat ess
-                        when (not (null es)) $ errsG es
+                 in do ess <- mapM deriveOneGroup gs
+                       let es = concat ess
+                       when (not (null es)) $ errsG es
          _ <- deriveTopResetClocks
 
          let findOutputResetClock i =
@@ -2516,12 +2517,12 @@ walkNF e =
                         -- the inner selector can wind up on the heap
                         -- because of "move" in evalHeap
                         [e_ref@(IRefT t ptr ref)] | (isitActionValue_ t) || (isitAction t)
-                            ->  do (P p' e', ws) <- walkNF e_ref
-                                   upd (pConj p0 p') (IAps f ts [e']) ws
-                        _ ->    do when doDebug $ traceM "not stvar or foreign\n"
-                                   when doDebug $ traceM (show u ++ "\n")
-                                   when doDebug $ traceM (show es' ++ "\n")
-                                   nfError "walkNF sel" u
+                            ->  do (P p' e', ws) <- walkNF e_ref;
+                                   upd (pConj p0 p') (IAps f ts [e']) ws;
+                        _ ->    do when doDebug $ traceM "not stvar or foreign\n";
+                                   when doDebug $ traceM (show u ++ "\n");
+                                   when doDebug $ traceM (show es' ++ "\n");
+                                   nfError "walkNF sel" u;
 
                 IAps f@(ICon i (ICForeign { })) ts es -> do
                     (p, es', ws) <- walkList walkNF es
@@ -5005,7 +5006,7 @@ pExpr e = P pTrue e
 
 addPredG :: HPred -> G PExpr -> G PExpr
 addPredG p m | p == pTrue = m
-             | otherwise  = do (P p' e) <- m
+             | otherwise  = do (P p' e) <- m;
                                return (P (pConj p p') e)
 
 -----------------------------------------------------------------------------
@@ -5109,7 +5110,7 @@ iArrayUpdate arr ix pv =
  do
    -- traceM ("iArrayUpdate: " ++ (show ix) ++ " from array bounds " ++ (show (max, min)))
    cell <- mkArrayCell pv
-   return (arr Array.// [(ix, cell)])
+   return arr // [(ix, cell)]
 
 iArrayInRange :: ILazyArray HeapData -> Integer -> Bool
 iArrayInRange arr = Array.inRange (Array.bounds arr)

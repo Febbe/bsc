@@ -598,14 +598,14 @@ htclDescribeCmdGrammar grm limit = let (desc,_,_) = prt 2 limit grm in desc
 -- Haskell read function into a value of the given type.
 matchArgType :: TclInterp -> TclObj -> HTclArgType -> IO (Maybe String)
 matchArgType i o StringArg = htclObjToMString i o
-matchArgType i o IntArg    = do mi <- htclObjToMInt i o
-                                return $ mi >>= (Just . show)
-matchArgType i o PtrArg    = do mi <- htclObjToMWordPtr i o
-                                return $ mi >>= (Just . show)
+matchArgType i o IntArg = do mi <- htclObjToMInt i o
+                             return $ mi >>= (Just . show)
+matchArgType i o PtrArg = do mi <- htclObjToMWordPtr i o
+                             return $ mi >>= (Just . show)
 matchArgType i o DoubleArg = do md <- htclObjToMDouble i o
                                 return $ md >>= (Just . show)
-matchArgType i o BoolArg   = do mb <- htclObjToMBool i o
-                                return $ mb >>= (Just . show)
+matchArgType i o BoolArg = do mb <- htclObjToMBool i o
+                              return $ mb >>= (Just . show)
 
 -- Match a list of TCl objects representing a command against its grammar.
 -- The result is a tuple containing:

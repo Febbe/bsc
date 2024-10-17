@@ -2677,7 +2677,8 @@ tclSim ("cd":args) = do
 tclSim ("clock":args) = do
   g <- readIORef globalVar
   case (tp_bluesim g, args) of
-    (Just bs, [])    -> do cs <- getClockInfo bs
+    (Just bs, [])    -> do 
+                           cs <- getClockInfo bs
                            obj <- toTclObj cs
                            return $ TCL obj
     (Just bs, [clk]) -> do mbs <- setActiveClock bs clk
@@ -2691,7 +2692,8 @@ tclSim ("clock":args) = do
 tclSim ("config":args) = do
   g <- readIORef globalVar
   case (tp_bluesim g, args) of
-    (Just bs, [])    -> do obj <- toTclObj ("interactive", is_interactive bs)
+    (Just bs, [])    -> do 
+                           obj <- toTclObj ("interactive", is_interactive bs)
                            return $ TLst [TCL obj]
     (Just bs, ["interactive"]) -> do let bs' = bs { is_interactive = True }
                                      bk_set_interactive bs
@@ -2704,7 +2706,8 @@ tclSim ("describe":hdls) = do
   g <- readIORef globalVar
   case (tp_bluesim g,hdls) of
     (Just bs,[]) -> internalError $ "tclSim: grammar mismatch: " ++ (show hdls)
-    (Just bs,_)  -> do let syms = map read hdls
+    (Just bs,_)  -> do 
+                       let syms = map read hdls
                        names <- mapM (bk_get_key bs) syms
                        descs <- mapM (describeSym bs) syms
                        objs  <- mapM toTclObj (zip names descs)
@@ -2717,7 +2720,8 @@ tclSim ("get":hdls) = do
   g <- readIORef globalVar
   case (tp_bluesim g, hdls) of
     (Just bs, []) -> internalError $ "tclSim: grammar mismatch: " ++ (show hdls)
-    (Just bs, _)  -> do ptrs <- mapM (handleModuleRedirect bs) (map read hdls)
+    (Just bs, _)  -> do 
+                        ptrs <- mapM (handleModuleRedirect bs) (map read hdls)
                         vs <- mapM (bk_peek_symbol_value bs) ptrs
                         let bad = [ (p,v) | (p,v) <- zip ptrs vs, v == NoValue ]
                         when (not (null bad)) $
