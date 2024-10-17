@@ -1,0 +1,17 @@
+cmake_minimum_required(VERSION 3.15)
+
+file(GLOB_RECURSE sources "*.cpp")
+
+add_library(printer STATIC ${sources})
+
+target_link_libraries(printer PUBLIC 
+    AST
+    extlib
+    sat
+    boost
+    STPManager
+    to
+    parser
+    absrefine_counterexample
+    simplifier
+)
