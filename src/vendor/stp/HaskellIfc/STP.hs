@@ -174,7 +174,7 @@ checkVersion = do
 getEnvDefault :: String -> String -> IO String
 getEnvDefault var def = do
     value <- lookupEnv var
-    return $ maybe def id value  
+    return $ maybe def id value
 
 ------------------------------------------------------------------------
 -- Context manipulation

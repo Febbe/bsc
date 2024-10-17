@@ -7,6 +7,7 @@
 #include <map>
 #include <set>
 #include <list>
+#include <thread>
 
 #include "bluesim_kernel_api.h"
 #include "bs_model.h"

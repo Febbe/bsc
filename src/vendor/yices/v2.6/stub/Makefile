@@ -52,6 +52,8 @@ endif
 ifeq ($(OSTYPE), Darwin)
 SHAREDFLAG = -dynamiclib
 SONAMEFLAG = -install_name
+else ifeq ($(OSTYPE), Mingw)
+SHAREDFLAG= -shared
 else
 SHAREDFLAG = -shared
 SONAMEFLAG = -soname

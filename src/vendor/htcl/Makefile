@@ -18,6 +18,10 @@ $(error Unsupported Tcl version: $(TCLVER))
 endif
 endif
 
+ifeq ($(OSTYPE),Mingw)
+TCL_INC_FLAGS += -DSTATIC_BUILD
+endif
+
 # -----
 
 GHCFLAGS += -Wall ${TCL_INC_FLAGS}

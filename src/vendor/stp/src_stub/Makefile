@@ -11,8 +11,10 @@ INC_DIR=../include
 
 ifeq ($(OSTYPE), Darwin)
 LDFLAGS = -dynamiclib -Wl,-install_name,libstp_stub.so
+else ifeq ($(OSTYPE), Mingw)
+LDFLAGS = -shared
 else
-LDFLAGS = -shared -Wl,-soname,libstp_stub.so
+LDFLAGS = -shared -Wl,$(SONAMEFLAG),libstp_stub.so
 endif
 
 .PHONY: all

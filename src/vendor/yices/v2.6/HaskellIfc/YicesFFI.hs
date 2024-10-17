@@ -1,5 +1,6 @@
 {-# LANGUAGE ForeignFunctionInterface   #-}
 {-# LANGUAGE EmptyDataDecls             #-}
+{-# LANGUAGE CApiFFI                    #-}
 
 module YicesFFI (
 
@@ -415,6 +416,7 @@ module YicesFFI (
 import Foreign
 import Foreign.C.Types
 import Foreign.C.String
+import Foreign.C.ConstPtr
 
 ------------------------------------------------------------------------
 -- C Types
@@ -447,17 +449,17 @@ type YErrorCode = CInt
 -- Version numbers
 
 -- versions are (const char *),  not a C function call
-foreign import ccall "yices.h &yices_version"
-    yices_version ::  Ptr CString
+foreign import capi "yices.h value yices_version"
+   yices_version ::  ConstPtr CChar
 
-foreign import ccall unsafe "yices.h &yices_build_arch"
-    yices_build_arch :: Ptr CString
+foreign import capi unsafe "yices.h value yices_build_arch"
+   yices_build_arch :: ConstPtr CChar
 
-foreign import ccall unsafe "yices.h &yices_build_mode"
-    yices_build_mode :: Ptr CString
+foreign import capi unsafe "yices.h value yices_build_mode"
+   yices_build_mode :: ConstPtr CChar
 
-foreign import ccall unsafe "yices.h &yices_build_date"
-    yices_build_date :: Ptr CString
+foreign import capi unsafe "yices.h value yices_build_date"
+   yices_build_date :: ConstPtr CChar
 
 ------------------------------------------------------------------------
 -- Global initialization and cleanup

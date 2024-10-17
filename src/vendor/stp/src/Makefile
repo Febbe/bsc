@@ -73,7 +73,11 @@ lib/$(SNAME):  c_interface/c_interface.o \
 	@# For some reason, this line doesn't work
 	@# $(CXX) $(CFLAGS) $(SHAREDFLAG) -o $@ $^
 	@# We use --whole-archive to ensure that all symbols in to-sat are used
+ifeq ($(OSTYPE), Mingw)	
+	$(CXX) $(CFLAGS) $(SHAREDFLAG) -o $@ $(LIBCCARGS)
+else
 	$(CXX) $(CFLAGS) $(SHAREDFLAG)  -Wl,$(SONAMEFLAG),$(SNAME) -o $@ $(LIBCCARGS)
+endif
 
 ifneq ($(OSTYPE), Darwin, Mingw)
 lib/libstp.so: lib/libstp.so.1

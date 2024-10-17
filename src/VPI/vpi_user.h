@@ -18,6 +18,7 @@
 #define VPI_USER_H
 
 #include <stdarg.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,18 +31,24 @@ extern "C" {
 /* Sized variables */
 #ifndef PLI_TYPES
 #define PLI_TYPES
-typedef int             PLI_INT32;
-typedef unsigned int    PLI_UINT32;
-typedef short           PLI_INT16;
-typedef unsigned short  PLI_UINT16;
-typedef char            PLI_BYTE8;
-typedef unsigned char   PLI_UBYTE8;
+typedef int32_t  PLI_INT32;
+typedef uint32_t PLI_UINT32;
+typedef int16_t  PLI_INT16;
+typedef uint16_t PLI_UINT16;
+typedef char     PLI_BYTE8;
+typedef uint8_t  PLI_UBYTE8;
+#endif
+
+#ifndef PLI_EXPORT
+#define PLI_EXPORTVAL __declspec(dllimport) 
+#else
+#define PLI_EXPORTVAL __declspec(dllexport)
 #endif
 
 /* Use to export a symbol */
-#if WIN32
+#ifdef _WIN32
 #ifndef PLI_DLLISPEC
-#define PLI_DLLISPEC __declspec(dllimport)
+#define PLI_DLLISPEC PLI_EXPORTVAL
 #define VPI_USER_DEFINED_DLLISPEC 1
 #endif
 #else
@@ -51,7 +58,7 @@ typedef unsigned char   PLI_UBYTE8;
 #endif
 
 /* Use to import a symbol */
-#if WIN32
+#ifdef _WIN32
 #ifndef PLI_DLLESPEC
 #define PLI_DLLESPEC __declspec(dllexport)
 #define VPI_USER_DEFINED_DLLESPEC 1

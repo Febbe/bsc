@@ -40,6 +40,9 @@ ifeq ($(OSTYPE), Darwin)
 # will be looked up later when the library is linked
 LIBBDPI=libbdpi.dylib
 LDFLAGS = -dynamiclib -Wl,-install_name,@rpath/$(LIBBDPI),-undefined,dynamic_lookup
+else ifeq ($(OSTYPE), Mingw)
+LIBBDPI = libbdpi.dll
+LDFLAGS = -shared
 else
 LIBBDPI=libbdpi.so
 LDFLAGS = -shared -Wl,-soname,$(LIBBDPI)
@@ -57,7 +60,19 @@ vpath %.c ../
 
 # -------------------------
 
-$(LIBBDPI): libbdpi.o
+LIBBDPIOBJS = libbdpi.o
+
+ifeq ($(OSTYPE), Mingw)
+LIBBDPIOBJS += vpi.dll.a vpi.dll 
+vpi.dll.a vpi.dll: stub/vpi_user.c
+	$(CC) $(CFLAGS) -shared -o $@ $<
+
+LDFLAGS += -L. -lvpi
+else
+
+endif
+
+$(LIBBDPI): $(LIBBDPIOBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $<
 
 # Static check of the header files before releasing them.

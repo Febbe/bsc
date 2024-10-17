@@ -154,6 +154,7 @@ import Data.List(isPrefixOf)
 import System.IO.Unsafe(unsafePerformIO)
 
 import ErrorUtil
+import Foreign.C.ConstPtr (ConstPtr(unConstPtr))
 
 word32_size, word64_size :: Int
 word32_size = finiteBitSize (0 :: Word32)
@@ -211,16 +212,16 @@ data Status
 -- Version numbers
 
 version :: IO String
-version = peek yices_version >>= peekCString
+version = peekCString (unConstPtr yices_version)
 
 buildArch :: IO String
-buildArch = peek  yices_build_arch >>= peekCString
+buildArch = peekCString (unConstPtr yices_build_arch)
 
 buildMode :: IO String
-buildMode = peek yices_build_arch >>= peekCString
+buildMode = peekCString (unConstPtr yices_build_arch)
 
 buildDate :: IO String
-buildDate = peek yices_build_arch >>= peekCString
+buildDate = peekCString (unConstPtr yices_build_arch)
 
 -- Throw an error if the version is a stub
 checkVersion :: IO (String)

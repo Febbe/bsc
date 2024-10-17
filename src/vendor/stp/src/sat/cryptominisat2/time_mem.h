@@ -28,13 +28,13 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
   #include <windows.h>
   // Include windows.h first
   #include <psapi.h>
+  #include <realtimeapiset.h>
 #else
   #include <sys/time.h>
   #include <sys/resource.h>
   #include <unistd.h>
 #endif
 #include <cstdint>
-#include <realtimeapiset.h>
 
 namespace MINISAT
 {
